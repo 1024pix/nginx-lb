@@ -1,4 +1,6 @@
 
+set $maintenance_mode <%= ENV['MAINTENANCE'] %>;
+
 add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
 
 if ($http_x_forwarded_proto != 'https' ) {
@@ -7,7 +9,7 @@ if ($http_x_forwarded_proto != 'https' ) {
 
 # static assets. Fetch the asset on gituhb
 location ~* ".*\.\w{1,5}$" {
-    if (<%= ENV['MAINTENANCE'] %> = enabled) {
+    if ($maintenance_mode = enabled) {
         return 503;
     }
     proxy_pass https://betagouv.github.io/pix/live/<%= ENV['ENVIRONMENT'] %>$uri;
@@ -16,7 +18,7 @@ location ~* ".*\.\w{1,5}$" {
 
 # API
 location /api {
-    if (<%= ENV['MAINTENANCE'] %> = enabled) {
+    if ($maintenance_mode = enabled) {
         return 503;
     }
     proxy_pass http://pix-api.scalingo.io;
@@ -24,7 +26,7 @@ location /api {
 
 # dynamic pages rendered client-side. Always fetch index.html on github
 location / {
-    if (<%= ENV['MAINTENANCE'] %> = enabled) {
+    if ($maintenance_mode = enabled) {
         return 503;
     }
     rewrite ^.*$ /pix/live/<%= ENV['ENVIRONMENT'] %>/ break;
