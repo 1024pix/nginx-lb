@@ -1,57 +1,61 @@
-upstream api 
-    server pix-api.scalingo.io;
-}
 
-server {
-    listen 80 default_server;
-    server_name _;
+http {
 
-    location / {
-        return 301 https://<%= ENV['FQDN'] %>$request_uri;
-    }
-}
-
-server {
-    listen 80;
-    server_name <%= ENV['FQDN'] %>;
-
-    add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
-
-    if ($http_x_forwarded_proto != 'https' ) {
-        return 301 https://$host$request_uri;
+    upstream api
+        server pix-api.scalingo.io;
     }
 
-    # static assets. Fetch the asset on gituhb
-    location ~* ".*\.\w{1,5}$" {
-        if (<%= ENV['MAINTENANCE_MODE'] %> = enabled) {
-            return 503;
+    server {
+        listen 80 default_server;
+        server_name _;
+
+        location / {
+            return 301 https://<%= ENV['FQDN'] %>$request_uri;
         }
-        proxy_pass https://betagouv.github.io/pix/live/<%= ENV['ENVIRONMENT'] %>$uri;
-        proxy_redirect https://betagouv.github.io/pix/live/<%= ENV['ENVIRONMENT'] %> https://<%= ENV['FQDN'] %>;
     }
 
-    # API
-    location /api {
-        if (<%= ENV['MAINTENANCE_MODE'] %> = enabled) {
-            return 503;
+    server {
+        listen 80;
+        server_name <%= ENV['FQDN'] %>;
+
+        add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+
+        if ($http_x_forwarded_proto != 'https' ) {
+            return 301 https://$host$request_uri;
         }
-        proxy_pass http://api;
-    }
 
-    # dynamic pages rendered client-side. Always fetch index.html on github
-    location / {
-        if (<%= ENV['MAINTENANCE_MODE'] %> = enabled) {
-            return 503;
+        # static assets. Fetch the asset on gituhb
+        location ~* ".*\.\w{1,5}$" {
+            if (<%= ENV['MAINTENANCE_MODE'] %> = enabled) {
+                return 503;
+            }
+            proxy_pass https://betagouv.github.io/pix/live/<%= ENV['ENVIRONMENT'] %>$uri;
+            proxy_redirect https://betagouv.github.io/pix/live/<%= ENV['ENVIRONMENT'] %> https://<%= ENV['FQDN'] %>;
         }
-        rewrite ^.*$ /pix/live/<%= ENV['ENVIRONMENT'] %>/ break;
-        proxy_pass https://betagouv.github.io/pix/live/<%= ENV['ENVIRONMENT'] %>/;
-        proxy_redirect https://betagouv.github.io/pix/live/<%= ENV['ENVIRONMENT'] %> https://<%= ENV['FQDN'] %>;
+
+        # API
+        location /api {
+            if (<%= ENV['MAINTENANCE_MODE'] %> = enabled) {
+                return 503;
+            }
+            proxy_pass http://api;
+        }
+
+        # dynamic pages rendered client-side. Always fetch index.html on github
+        location / {
+            if (<%= ENV['MAINTENANCE_MODE'] %> = enabled) {
+                return 503;
+            }
+            rewrite ^.*$ /pix/live/<%= ENV['ENVIRONMENT'] %>/ break;
+            proxy_pass https://betagouv.github.io/pix/live/<%= ENV['ENVIRONMENT'] %>/;
+            proxy_redirect https://betagouv.github.io/pix/live/<%= ENV['ENVIRONMENT'] %> https://<%= ENV['FQDN'] %>;
+        }
+
+        # Error pages.
+        error_page 503 /maintenance_page.html;
+        location = /maintenance_page.html {
+            root /;
+        }
     }
 
-    # Error pages.
-    error_page 503 /maintenance_page.html;
-    location = /maintenance_page.html {
-        root /;
-    }
 }
-
