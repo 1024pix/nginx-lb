@@ -12,8 +12,8 @@ location ~* ".*\.\w{1,5}$" {
     if ($maintenance_mode = enabled) {
         return 503;
     }
-    proxy_pass https://betagouv.github.io/pix/live/<%= ENV['ENVIRONMENT'] %>$uri;
-    proxy_redirect https://betagouv.github.io/pix/live/<%= ENV['ENVIRONMENT'] %> https://<%= ENV['FQDN'] %>;
+    proxy_pass https://1024pix.github.io/pix/live/<%= ENV['ENVIRONMENT'] %>$uri;
+    proxy_redirect https://1024pix.github.io/pix/live/<%= ENV['ENVIRONMENT'] %> https://<%= ENV['FQDN'] %>;
 }
 
 # API
@@ -30,8 +30,8 @@ location / {
         return 503;
     }
     rewrite ^.*$ /pix/live/<%= ENV['ENVIRONMENT'] %>/ break;
-    proxy_pass https://betagouv.github.io/pix/live/<%= ENV['ENVIRONMENT'] %>/;
-    proxy_redirect https://betagouv.github.io/pix/live/<%= ENV['ENVIRONMENT'] %> https://<%= ENV['FQDN'] %>;
+    proxy_pass https://1024pix.github.io/pix/live/<%= ENV['ENVIRONMENT'] %>/;
+    proxy_redirect https://1024pix.github.io/pix/live/<%= ENV['ENVIRONMENT'] %> https://<%= ENV['FQDN'] %>;
 }
 
 # Error pages.
