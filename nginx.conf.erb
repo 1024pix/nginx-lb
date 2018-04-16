@@ -18,6 +18,7 @@ location /api {
         return 503;
     }
     proxy_pass http://pix-api.scalingo.io;
+    proxy_redirect https://pix-api.scalingo.io/ https://<%= ENV['FQDN'] %>/;
 }
 
 # dynamic pages rendered client-side. Always fetch index.html on github
