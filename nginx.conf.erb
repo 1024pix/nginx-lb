@@ -3,10 +3,6 @@ set $maintenance_mode <%= ENV['MAINTENANCE'] %>;
 
 add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
 
-if ($http_x_forwarded_proto != 'https' ) {
-    return 301 https://$host$request_uri;
-}
-
 # static assets. Fetch the asset on gituhb
 location ~* ".*\.\w{1,5}$" {
     if ($maintenance_mode = enabled) {
