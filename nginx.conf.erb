@@ -17,7 +17,7 @@ location /api {
     if ($maintenance_mode = enabled) {
         return 503;
     }
-    proxy_pass http://pix-api.scalingo.io;
+    proxy_pass https://pix-api.scalingo.io;
     proxy_redirect https://pix-api.scalingo.io/ https://<%= ENV['FQDN'] %>/;
 }
 
