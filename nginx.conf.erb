@@ -17,8 +17,8 @@ location /api {
     if ($maintenance_mode = enabled) {
         return 503;
     }
-    proxy_pass https://pix-api.scalingo.io;
-    proxy_redirect https://pix-api.scalingo.io/ https://<%= ENV['FQDN'] %>/;
+    proxy_pass https://<%= ENV['API'] %>;
+    proxy_redirect https://<%= ENV['API'] %>/ https://<%= ENV['FQDN'] %>/;
 }
 
 # dynamic pages rendered client-side. Always fetch index.html on github
