@@ -1,4 +1,15 @@
 
+# set the $pix_environment variable when the hostname match <something>.pix.fr
+if ($http_host ~* "^(?<pix_environment>.+)\.<%= ENV['FQDN'] %>$") {
+    # integration API doesn't support https
+    set $remote_api http://<% ENV['API] %>;
+}
+# set the $pix_environment variable for production and staging cases
+if (<%= ENV['ENVIRONMENT'] %> != integration ]) {
+    set $pix_environment <%= ENV['ENVIRONMENT'] %>;
+    set $remote_api https://<% ENV['API] %>;
+}
+
 set $maintenance_mode <%= ENV['MAINTENANCE'] %>;
 resolver 1.1.1.1;
 
@@ -7,8 +18,8 @@ location ~* ".*\.\w{1,5}$" {
     if ($maintenance_mode = enabled) {
         return 503;
     }
-    proxy_pass https://1024pix.github.io/pix/live/<%= ENV['ENVIRONMENT'] %>$uri;
-    proxy_redirect https://1024pix.github.io/pix/live/<%= ENV['ENVIRONMENT'] %> https://<%= ENV['FQDN'] %>;
+    proxy_pass https://1024pix.github.io/pix/live/$pix_environment$uri;
+    proxy_redirect https://1024pix.github.io/pix/live/$pix_environment https://$http_host;
 }
 
 # API
@@ -16,8 +27,8 @@ location /api {
     if ($maintenance_mode = enabled) {
         return 503;
     }
-    proxy_pass https://<%= ENV['API'] %>;
-    proxy_redirect https://<%= ENV['API'] %>/ https://<%= ENV['FQDN'] %>/;
+    proxy_pass $remote_api;
+    proxy_redirect $remote_api/ https://$http_host/;
 }
 
 # dynamic pages rendered client-side. Always fetch index.html on github
@@ -25,9 +36,9 @@ location / {
     if ($maintenance_mode = enabled) {
         return 503;
     }
-    rewrite ^.*$ /pix/live/<%= ENV['ENVIRONMENT'] %>/ break;
-    proxy_pass https://1024pix.github.io/pix/live/<%= ENV['ENVIRONMENT'] %>/;
-    proxy_redirect https://1024pix.github.io/pix/live/<%= ENV['ENVIRONMENT'] %> https://<%= ENV['FQDN'] %>;
+    rewrite ^.*$ /pix/live/$pix_environment/ break;
+    proxy_pass https://1024pix.github.io/pix/live/$pix_environment/;
+    proxy_redirect https://1024pix.github.io/pix/live/$pix_environment https://$http_host;
 }
 
 # Error pages.
