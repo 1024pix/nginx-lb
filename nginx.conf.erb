@@ -1,7 +1,6 @@
 
 set $maintenance_mode <%= ENV['MAINTENANCE'] %>;
-
-add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+resolver 1.1.1.1;
 
 # static assets. Fetch the asset on gituhb
 location ~* ".*\.\w{1,5}$" {
