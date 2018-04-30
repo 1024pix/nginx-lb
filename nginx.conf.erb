@@ -1,16 +1,19 @@
 
 set $environment <%= ENV['ENVIRONMENT'] %>;
 set $maintenance_mode <%= ENV['MAINTENANCE'] %>;
-set $remote_api <%= ENV['API_URL'] %>;
+set $api_proto <%= ENV['API_PROTO'] %>;
+set $api_fqdn <%= ENV['API_FQDN'] %>;
 
 # XXX set the $application_branch variable in integration environment
 # in this case, the environment is the branch part of <branch>.integration.pix.fr
 if ($http_host ~* "^(?<application_branch>.+)\.<%= ENV['FQDN'] %>$") {
-    # nothing
+    set $api_branch "$application_branch.";
 }
+
 # set the $application_branch variable for production and staging cases
 if ($environment != integration) {
     set $application_branch $environment;
+    set $api_branch "";
 }
 resolver 1.1.1.1;
 
@@ -28,8 +31,8 @@ location /api {
     if ($maintenance_mode = enabled) {
         return 503;
     }
-    proxy_pass $remote_api;
-    proxy_redirect $remote_api/ https://$http_host/;
+    proxy_pass $api_proto://$api_branch$api_fqdn$uri;
+    proxy_redirect $api_proto://$api_branch$api_fqdn/ https://$http_host/;
 }
 
 # dynamic pages rendered client-side. Always fetch index.html on github
