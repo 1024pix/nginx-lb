@@ -1,8 +1,12 @@
+# XXX avoid some IPv6 issues
+resolver 1.1.1.1;
 
 set $environment <%= ENV['ENVIRONMENT'] %>;
 set $maintenance_mode <%= ENV['MAINTENANCE'] %>;
 set $api_proto <%= ENV['API_PROTO'] %>;
 set $api_fqdn <%= ENV['API_FQDN'] %>;
+
+set $uri_with_query_params "$uri$is_args$query_string";
 
 # XXX set the $application_branch variable in integration environment
 # in this case, the environment is the branch part of <branch>.integration.pix.fr
@@ -15,9 +19,6 @@ if ($environment != integration) {
     set $application_branch $environment;
     set $api_branch "";
 }
-resolver 1.1.1.1;
-
-set $uri_with_query_params "$uri$is_args$query_string";
 
 # static assets. Fetch the asset on gituhb
 location ~* ".*\.\w{1,5}$" {
