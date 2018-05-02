@@ -31,7 +31,7 @@ location /api {
     if ($maintenance_mode = enabled) {
         return 503;
     }
-    proxy_pass $api_proto://$api_branch$api_fqdn$uri;
+    proxy_pass $api_proto://$api_branch$api_fqdn$uri$is_args$query_string;
     proxy_redirect $api_proto://$api_branch$api_fqdn/ https://$http_host/;
 }
 
