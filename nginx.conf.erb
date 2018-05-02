@@ -17,12 +17,14 @@ if ($environment != integration) {
 }
 resolver 1.1.1.1;
 
+set $uri_with_query_params "$uri$is_args$query_string";
+
 # static assets. Fetch the asset on gituhb
 location ~* ".*\.\w{1,5}$" {
     if ($maintenance_mode = enabled) {
         return 503;
     }
-    proxy_pass https://1024pix.github.io/pix/live/$application_branch$uri;
+    proxy_pass https://1024pix.github.io/pix/live/$application_branch$uri_with_query_params;
     proxy_redirect https://1024pix.github.io/pix/live/$application_branch https://$http_host;
 }
 
@@ -31,7 +33,7 @@ location /api {
     if ($maintenance_mode = enabled) {
         return 503;
     }
-    proxy_pass $api_proto://$api_branch$api_fqdn$uri$is_args$query_string;
+    proxy_pass $api_proto://$api_branch$api_fqdn$uri_with_query_params;
     proxy_redirect $api_proto://$api_branch$api_fqdn/ https://$http_host/;
 }
 
@@ -40,8 +42,8 @@ location / {
     if ($maintenance_mode = enabled) {
         return 503;
     }
-    rewrite ^.*$ /pix/live/$application_branch/ break;
-    proxy_pass https://1024pix.github.io/pix/live/$application_branch/;
+
+    proxy_pass https://1024pix.github.io/pix/live/$application_branch/$is_args$query_string;
     proxy_redirect https://1024pix.github.io/pix/live/$application_branch https://$http_host;
 }
 
